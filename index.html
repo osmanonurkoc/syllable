@@ -34,6 +34,9 @@
       font-size: 20px;
       line-height: 1.8;
     }
+
+    .blue { color: blue; }
+    .red { color: red; }
   </style>
 </head>
 <body>
@@ -45,6 +48,10 @@
   <div id="content"></div>
 
   <script>
+    const VOWELS = '[aeıioöuüAEIİOÖUÜ]';
+    const CONSONANTS = '[^aeıioöuüAEIİOÖUÜ\s]';
+    const PATTERN = new RegExp('(C*VC*?)(C?V.*)'.replace(/C/g, CONSONANTS).replace(/V/g, VOWELS));
+
     let articles = [];
 
     async function fetchArticles() {
@@ -65,7 +72,52 @@
       const article = articles[index];
       const response = await fetch(article.url);
       const html = await response.text();
-      document.getElementById('content').innerHTML = html;
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = html;
+      syllabifyElement(tempDiv);
+      document.getElementById('content').innerHTML = tempDiv.innerHTML;
+    }
+
+    function syllabifyWord(word) {
+      if (matched = word.match(PATTERN)) {
+        return syllabifyWord(matched[1]) + '-' + syllabifyWord(matched[2]);
+      }
+      return word;
+    }
+
+    function syllabifyElement(element) {
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null);
+      const textNodes = [];
+
+      while (walker.nextNode()) {
+        const node = walker.currentNode;
+        const parentTag = node.parentElement?.tagName;
+        if (!['SCRIPT', 'STYLE'].includes(parentTag)) {
+          textNodes.push(node);
+        }
+      }
+
+      textNodes.forEach(node => {
+        const words = node.textContent.split(/(\s+)/);
+        const frag = document.createDocumentFragment();
+        let toggle = false;
+
+        for (const word of words) {
+          if (/^\s+$/.test(word)) {
+            frag.appendChild(document.createTextNode(word));
+          } else {
+            const syllables = syllabifyWord(word).split('-');
+            for (const syl of syllables) {
+              const span = document.createElement("span");
+              span.className = toggle ? "red" : "blue";
+              span.textContent = syl;
+              frag.appendChild(span);
+              toggle = !toggle;
+            }
+          }
+        }
+        node.replaceWith(frag);
+      });
     }
 
     window.onload = fetchArticles;
