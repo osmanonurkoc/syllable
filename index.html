@@ -58,7 +58,10 @@
       const index = document.getElementById("articleSelect").value;
       const article = articles[index];
       const response = await fetch(article.url);
-      const text = await response.text();
+      const html = await response.text();
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = html;
+      const text = tempDiv.innerText;
       const syllables = syllabifySentence(text);
       renderColored(syllables);
     }
@@ -82,7 +85,7 @@
         const parts = syllables.split('-');
         for (const part of parts) {
           const color = toggle ? 'red' : 'black';
-          html += `<span class="\${color}">\${part}</span>`;
+          html += `<span class="${color}">${part}</span>`;
           toggle = !toggle;
         }
         html += ' ';
