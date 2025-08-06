@@ -38,7 +38,7 @@
     const VOWELS = '[aıoueiöü]'
     const CONSONANTS = '[bcçdfgğhjklmnprsştvyz]'
     const PATTERN = new RegExp('(C*VC*?)(C?V.*)'.replace(/C/g, CONSONANTS).replace(/V/g, VOWELS), 'i')
-    const PUNCTUATION = /[.,;:"!?()\[\]{}<>]/g
+    const PUNCTUATION = /[.,;:'"!?()\[\]{}<>]/g
     let articles = [];
 
     async function fetchArticles() {
@@ -69,7 +69,6 @@
     function syllabifySentence(sentence){
       sentence = sentence
         .toLocaleLowerCase('tr-TR')
-        .replace(/'/g, '') // remove apostrophes
         .replace(PUNCTUATION, '')
         .replace(/\s+/g,' ')
         .trim();
