@@ -38,8 +38,9 @@
   <script>
     const VOWELS = '[aıoueiöüAIOUEİÖÜ]'
     const CONSONANTS = '[bcçdfgğhjklmnprsştvyzBCÇDFGĞHJKLMNPRSŞTVYZ]'
-    const PATTERN = new RegExp('(C*VC*?)(C?V.*)'.replace(/C/g, CONSONANTS).replace(/V/g, VOWELS))
+    const PATTERN = new RegExp('(C*VC*?)(C?V.*)'.replace(/C/g, CONSONANTS).replace(/V/g, VOWELS));
 
+    const SKIP_TAGS = ['CODE', 'PRE', 'SCRIPT', 'STYLE'];
     let articles = [];
 
     async function fetchArticles() {
@@ -75,29 +76,37 @@
     }
 
     function syllabifyElement(element) {
-      for (const node of element.childNodes) {
-        if (node.nodeType === 3) { // text node
-          const words = node.textContent.split(/(\s+)/); // keep spaces
-          const frag = document.createDocumentFragment();
-          let toggle = false;
-          for (const word of words) {
-            if (/^\s+$/.test(word)) {
-              frag.appendChild(document.createTextNode(word));
-            } else {
-              const syllables = syllabifyWord(word).split("-");
-              for (const syl of syllables) {
-                const span = document.createElement("span");
-                span.className = toggle ? "red" : "black";
-                span.textContent = syl;
-                frag.appendChild(span);
-                toggle = !toggle;
-              }
+      const treeWalker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {
+        acceptNode: node => {
+          const parentTag = node.parentNode.tagName;
+          return (parentTag && !SKIP_TAGS.includes(parentTag.toUpperCase())) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+        }
+      });
+
+      const nodes = [];
+      while (treeWalker.nextNode()) {
+        nodes.push(treeWalker.currentNode);
+      }
+
+      for (const node of nodes) {
+        const words = node.textContent.split(/(\s+)/); // include spaces
+        const frag = document.createDocumentFragment();
+        let toggle = false;
+        for (const word of words) {
+          if (/^\s+$/.test(word)) {
+            frag.appendChild(document.createTextNode(word));
+          } else {
+            const syllables = syllabifyWord(word).split("-");
+            for (const syl of syllables) {
+              const span = document.createElement("span");
+              span.className = toggle ? "red" : "black";
+              span.textContent = syl;
+              frag.appendChild(span);
+              toggle = !toggle;
             }
           }
-          node.replaceWith(frag);
-        } else if (node.nodeType === 1) {
-          syllabifyElement(node); // recursive
         }
+        node.replaceWith(frag);
       }
     }
 
