@@ -1,10 +1,23 @@
 [
   {
+<<<<<<< HEAD
     "title": "Güne Başlarken",
     "url": "https://osmanonurkoc.github.io/syllable/articles/gune-baslarken.html"
   },
   {
     "title": "Zihin Egzersizi",
     "url": "https://osmanonurkoc.github.io/syllable/articles/zihin-egzersizi.html"
+=======
+    "name": "Ela ve Güneş",
+    "url": "https://osmanonurkoc.github.io/syllable/Articles/ela.txt"
+  },
+  {
+    "name": "Gölgelerin Ardında",
+    "url": "https://osmanonurkoc.github.io/syllable/Articles/golgelerin_ardinda.md"
+  },
+  {
+    "name": "Hızlı Konuşma",
+    "url": "https://example.com/articles/hizli.txt"
+>>>>>>> 2607d48cd2185d8c673bc51e22fc899c7d40c320
   }
 ]
