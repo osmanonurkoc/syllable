@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Türkçe Hecelenmiş Görüntüleyici</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      line-height: 1.6;
+    }
+    select, button {
+      font-size: 16px;
+      margin-bottom: 1rem;
+      padding: 5px;
+    }
+    .output {
+      font-size: 24px;
+      margin-top: 1rem;
+      word-wrap: break-word;
+    }
+    .black { color: black; }
+    .red { color: red; }
+  </style>
+</head>
+<body>
+
+  <h1>Türkçe Hecelenmiş Görüntüleyici</h1>
+
+  <label for="articleSelect">Bir makale seçin:</label>
+  <select id="articleSelect"></select>
+  <button onclick="loadSelectedArticle()">Göster</button>
+
+  <div id="output" class="output"></div>
+
+  <script>
+    const VOWELS = '[aıoueiöü]'
+    const CONSONANTS = '[bcçdfgğhjklmnprsştvyz]'
+    const PATTERN = new RegExp('(C*VC*?)(C?V.*)'.replace(/C/g, CONSONANTS).replace(/V/g, VOWELS), 'i')
+    const PUNCTUATION = /[.,;:'"!?()\[\]{}<>]/g
+    let articles = [];
+
+    async function fetchArticles() {
+      const response = await fetch("articles.json");
+      articles = await response.json();
+      const selector = document.getElementById("articleSelect");
+      selector.innerHTML = "";
+      articles.forEach((article, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = article.name;
+        selector.appendChild(option);
+      });
+    }
+
+    async function loadSelectedArticle() {
+      const index = document.getElementById("articleSelect").value;
+      const article = articles[index];
+      const response = await fetch(article.url);
+      const text = await response.text();
+      const syllables = syllabifySentence(text);
+      renderColored(syllables);
+    }
+
+    function syllabifySentence(sentence){
+      sentence = sentence.toLocaleLowerCase('tr-TR').replace(PUNCTUATION, '').replace(/\s+/g,' ').trim()
+      let words = sentence.split(' ')
+      return words.map(syllabifyWord)
+    }
+
+    function syllabifyWord(partition){
+      if (matched = partition.match(PATTERN))
+          return matched[1] + '-' + syllabifyWord(matched[2])
+      return partition
+    }
+
+    function renderColored(syllablesPerWord) {
+      let html = '';
+      let toggle = false;
+      for (const syllables of syllablesPerWord) {
+        const parts = syllables.split('-');
+        for (const part of parts) {
+          const color = toggle ? 'red' : 'black';
+          html += `<span class="\${color}">\${part}</span>`;
+          toggle = !toggle;
+        }
+        html += ' ';
+      }
+      document.getElementById('output').innerHTML = html.trim();
+    }
+
+    window.onload = fetchArticles;
+  </script>
+</body>
+</html>
