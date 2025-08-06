@@ -1,14 +1,10 @@
 [
   {
-    "name": "Ela ve Güneş",
-    "url": "file:///C:/Users/Osman/Desktop/superead/Articles/ela.html"
+    "title": "Güne Başlarken",
+    "url": "https://osmanonurkoc.github.io/syllable/articles/gune-baslarken.html"
   },
   {
-    "name": "Farklılıklar",
-    "url": "https://example.com/articles/fark.txt"
-  },
-  {
-    "name": "Hızlı Konuşma",
-    "url": "https://example.com/articles/hizli.txt"
+    "title": "Zihin Egzersizi",
+    "url": "https://osmanonurkoc.github.io/syllable/articles/zihin-egzersizi.html"
   }
 ]
