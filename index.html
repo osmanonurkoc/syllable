@@ -183,16 +183,35 @@
       }
 
       nav {
-        position: absolute;
+        position: fixed;
         top: 64px;
         left: 0;
         height: calc(100% - 64px);
         z-index: 1000;
         background: var(--md-surface);
+        transform: translateX(-100%);
+      }
+
+      nav.show {
+        transform: translateX(0%);
       }
 
       .container {
         flex-direction: column;
+      }
+    }
+
+    @media (min-width: 769px) {
+      nav {
+        transform: none !important;
+      }
+
+      #sidebar {
+        transform: none !important;
+      }
+
+      .container {
+        flex-direction: row;
       }
     }
   </style>
@@ -349,7 +368,7 @@
     }
 
     document.getElementById("themeToggle").addEventListener("click", toggleTheme);
-    document.getElementById("menuBtn").addEventListener("click", toggleMenu);
+    document.getElementById("menuBtn").addEventListener("click", () => document.getElementById("sidebar").classList.toggle("show"));
     document.getElementById("fontSizeSelect").addEventListener("change", function () {
       document.body.style.setProperty("--font-size", this.value);
     });
