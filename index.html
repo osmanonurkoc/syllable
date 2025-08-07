@@ -12,7 +12,6 @@
       --md-bg: #121212;
       --md-surface: #1e1e1e;
       --md-primary: #bb86fc;
-      --md-on-primary: #000000;
       --md-bubble-red: #ff8a80;
       --md-bubble-blue: #82b1ff;
       --md-text: #ffffff;
@@ -108,15 +107,20 @@
       background-color: #2c2c2c;
     }
 
+    .word {
+      display: inline-flex;
+      gap: 0;
+      margin-right: 0.6rem;
+    }
+
     .bubble {
       display: inline-block;
-      padding: 0.1em 0.25em;
-      margin: 0.02em;
-      border-radius: 0.5em;
+      padding: 0.1em 0.3em;
+      border-radius: 1em;
+      font-size: 0.95em;
       background-color: var(--md-bubble-blue);
       color: black;
       font-weight: 500;
-      font-size: 0.85em;
     }
 
     .bubble.alt {
@@ -180,19 +184,20 @@
       nodes.forEach(node => {
         const words = node.textContent.split(/(\s+)/);
         const frag = document.createDocumentFragment();
-        let alt = false;
         for (const word of words) {
           if (/^\s+$/.test(word)) {
             frag.appendChild(document.createTextNode(word));
           } else {
+            const wordContainer = document.createElement("span");
+            wordContainer.className = "word";
             const syllables = syllabifyWord(word).split("-");
-            for (const syl of syllables) {
+            syllables.forEach((syl, i) => {
               const span = document.createElement("span");
-              span.className = "bubble" + (alt ? " alt" : "");
+              span.className = "bubble" + (i % 2 === 1 ? " alt" : "");
               span.textContent = syl;
-              frag.appendChild(span);
-              alt = !alt;
-            }
+              wordContainer.appendChild(span);
+            });
+            frag.appendChild(wordContainer);
           }
         }
         node.replaceWith(frag);
