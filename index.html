@@ -2,120 +2,162 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Hızlı Okuma Eğitimi</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hızlı Okuma Aracı</title>
   <style>
     :root {
       --bg: #ffffff;
       --fg: #000000;
+      --blue-bubble: #cce4ff;
+      --red-bubble: #ffd1d1;
     }
 
     body.dark {
       --bg: #1e1e1e;
-      --fg: #ffffff;
+      --fg: #eeeeee;
     }
 
     body {
       background-color: var(--bg);
       color: var(--fg);
-      font-family: 'Arial', sans-serif;
-      margin: 2rem;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-      padding: 1rem;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
       transition: background 0.3s, color 0.3s;
     }
 
-    @media (max-width: 600px) {
-      body {
-        margin: 1rem;
-        padding: 0.5rem;
+    aside {
+      background-color: #f2f2f2;
+      padding: 1rem;
+      width: 250px;
+      overflow-y: auto;
+      border-right: 1px solid #ccc;
+    }
+
+    body.dark aside {
+      background-color: #2a2a2a;
+      border-color: #444;
+    }
+
+    main {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+
+    .unit-title {
+      font-weight: bold;
+      margin-top: 1rem;
+    }
+
+    .article-button {
+      display: block;
+      width: 100%;
+      padding: 0.5rem;
+      margin: 0.25rem 0;
+      font-size: 1rem;
+      background-color: transparent;
+      border: 1px solid var(--fg);
+      color: var(--fg);
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .article-button:hover {
+      background-color: var(--fg);
+      color: var(--bg);
+    }
+
+    #themeToggle {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .bubble {
+      display: inline-block;
+      padding: 0.2em 0.4em;
+      margin: 0.05em;
+      border-radius: 0.6em;
+      background-color: var(--blue-bubble);
+      color: black;
+      font-weight: 500;
+    }
+
+    .bubble.alt {
+      background-color: var(--red-bubble);
+    }
+
+    @media (max-width: 768px) {
+      aside {
+        width: 180px;
       }
     }
 
-    select, button {
-      font-size: 16px;
-      padding: 0.5rem;
-      margin: 0.5rem 0;
-      width: 100%;
-    }
-
-    .toolbar {
-      display: flex;
-      gap: 0.5rem;
-      flex-direction: column;
-    }
-
-    .red { color: red; }
-    .blue { color: blue; }
-
-    #content {
-      margin-top: 1.5rem;
-      font-size: 20px;
-      line-height: 1.8;
+    @media (max-width: 500px) {
+      body {
+        flex-direction: column;
+      }
+      aside {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #ccc;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Hızlı Okuma Eğitimi</h1>
-
-  <div class="toolbar">
-    <label for="articleSelect">Bir yazı seçin:</label>
-    <select id="articleSelect"></select>
-
-    <label for="fontSelect">Yazı Tipi:</label>
-    <select id="fontSelect">
-      <option value="Arial" selected>Arial</option>
-      <option value="Georgia">Georgia</option>
-      <option value="Courier New">Courier New</option>
-    </select>
-
-    <button onclick="loadSelectedArticle()">Göster</button>
-    <button onclick="toggleTheme()">Tema Değiştir</button>
-  </div>
-
-  <div id="content"></div>
+  <button id="themeToggle" onclick="toggleTheme()">🌓</button>
+  <aside id="sidebar"></aside>
+  <main id="content">Bir yazı seçin...</main>
 
   <script>
-    let articles = [];
-    const content = document.getElementById("content");
-
-    async function fetchArticles() {
-      const res = await fetch("articles.json");
-      articles = await res.json();
-      const select = document.getElementById("articleSelect");
-      select.innerHTML = '';
-      articles.forEach((a, i) => {
-        const opt = document.createElement("option");
-        opt.value = i;
-        opt.textContent = `[${a.unit}] ${a.title}`;
-        select.appendChild(opt);
-      });
-    }
-
-    async function loadSelectedArticle() {
-      const idx = document.getElementById("articleSelect").value;
-      const article = articles[idx];
-      const res = await fetch(article.url);
-      const html = await res.text();
-      const wrapper = document.createElement("div");
-      wrapper.innerHTML = html;
-      syllabifyElement(wrapper);
-      content.innerHTML = wrapper.innerHTML;
-    }
+    let syllableToggle = false;
 
     function toggleTheme() {
       document.body.classList.toggle("dark");
     }
 
-    document.getElementById("fontSelect").addEventListener("change", (e) => {
-      document.body.style.fontFamily = e.target.value;
-    });
+    function createSidebar(units) {
+      const sidebar = document.getElementById("sidebar");
+      sidebar.innerHTML = "";
+
+      for (const unit in units) {
+        const title = document.createElement("div");
+        title.textContent = unit;
+        title.className = "unit-title";
+        sidebar.appendChild(title);
+
+        units[unit].forEach(article => {
+          const btn = document.createElement("button");
+          btn.className = "article-button";
+          btn.textContent = article.title;
+          btn.onclick = () => loadArticle(article.file);
+          sidebar.appendChild(btn);
+        });
+      }
+    }
+
+    async function loadArticle(path) {
+      const res = await fetch(path);
+      const html = await res.text();
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = html;
+      syllabify(wrapper);
+      document.getElementById("content").innerHTML = wrapper.innerHTML;
+    }
 
     function syllabifyWord(word) {
-      word = word.replace(/[’'‘`]/g, ""); // Apostrof normalize
+      word = word.replace(/[’'‘`]/g, "");
       const V = "[aeıioöuüAEIİOÖUÜ]";
       const C = "[^aeıioöuüAEIİOÖUÜ\s]";
       const pattern = new RegExp(`(${C}*${V}${C}*?)(${C}?${V}.*)`);
@@ -125,10 +167,9 @@
       return word;
     }
 
-    function syllabifyElement(element) {
-      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+    function syllabify(el) {
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
       const nodes = [];
-
       while (walker.nextNode()) {
         const node = walker.currentNode;
         if (!['SCRIPT', 'STYLE'].includes(node.parentElement?.tagName)) {
@@ -136,30 +177,36 @@
         }
       }
 
-      nodes.forEach((node) => {
-        const parts = node.textContent.split(/(\s+)/);
+      nodes.forEach(node => {
+        const words = node.textContent.split(/(\s+)/);
         const frag = document.createDocumentFragment();
-        let toggle = false;
+        let alt = false;
 
-        parts.forEach(part => {
-          if (/^\s+$/.test(part)) {
-            frag.appendChild(document.createTextNode(part));
+        for (const word of words) {
+          if (/^\s+$/.test(word)) {
+            frag.appendChild(document.createTextNode(word));
           } else {
-            const syllables = syllabifyWord(part).split("-");
-            syllables.forEach(syl => {
+            const syllables = syllabifyWord(word).split("-");
+            for (const syl of syllables) {
               const span = document.createElement("span");
-              span.className = toggle ? "red" : "blue";
+              span.className = "bubble" + (alt ? " alt" : "");
               span.textContent = syl;
               frag.appendChild(span);
-              toggle = !toggle;
-            });
+              alt = !alt;
+            }
           }
-        });
+        }
         node.replaceWith(frag);
       });
     }
 
-    window.onload = fetchArticles;
+    async function init() {
+      const res = await fetch("articles.json");
+      const data = await res.json();
+      createSidebar(data);
+    }
+
+    init();
   </script>
 </body>
 </html>

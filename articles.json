@@ -8,3 +8,25 @@
     "url": "https://osmanonurkoc.github.io/syllable/articles/zihin-egzersizi.html"
   }
 ]
+
+
+
+
+{
+  "1. Ünite": [
+    {
+      "title": "Güne Başlarken",
+      "file": "https://osmanonurkoc.github.io/syllable/articles/unit1/gune-baslarken.html"
+    },
+    {
+      "title": "Zihin Egzersizi",
+      "file": "https://osmanonurkoc.github.io/syllable/articles/unit1/zihin-egzersizi.html"
+    }
+  ],
+  "2. Ünite": [
+    {
+      "title": "Odaklanma",
+      "file": "https://osmanonurkoc.github.io/syllable/articles/unit2/odaklanma.html"
+    }
+  ]
+}
